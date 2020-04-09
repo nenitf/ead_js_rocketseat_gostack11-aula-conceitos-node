@@ -1,4 +1,5 @@
 const express = require('express');
+const { uuid } = require('uuidv4')// universe unique id
 
 const app = express();
 
@@ -24,60 +25,67 @@ app.use(express.json());
   * Request Body: conteúdo para criar ou editar recurso (com JSON)
   */
 
-app.get('/projects', (request, response) => {
-    // localhost:3333/projects?title=React&owner=Diego
-    // query params
-    const query = request.query;
-    const { title, owner} = request.query;
-    console.log(title, owner, query);
-    
+const projects = [];
 
-    return response.json([
-        'Projeto 1',
-        'Projeto 2',
-    ]);
+app.get('/projects', (request, response) => {
+    const { title } = request.query;
+    
+    const results = title
+        ? projects.filter(project => project.title.includes(title))
+        : projects;
+
+    return response.json(results);
 });
 
 // mesmo endereço (recurso) método diferente
 // browser não consegue acessar com esse método, precisa de restclient (insomnia)
 app.post('/projects', (request, response) => {
-    // route body
-    const body = request.body; // undefined se não usar app.use(express.json());
     const { title, owner } = request.body;
-    console.log(title, owner, body);
+    
+    const project = { id: uuid(), title, owner }
 
+    projects.push(project);
 
-    return response.json([
-        'Projeto 1',
-        'Projeto 2',
-        'Projeto 3',
-    ]);
+    return response.json(project);
 });
 
 // localhost:3333/projects/1
 // browser não consegue acessar com esse método, precisa de restclient (insomnia)
 app.put('/projects/:id', (request, response) => {
-    // localhost:3333/projects/1
-    // route params
-    const params = request.params;
     const { id } = request.params;
-    console.log(id, params);
+    const { title, owner } = request.body;
 
+    const projectIndex = projects.findIndex(project => project.id === id)
+    
+    if (projectIndex < 0){
+        return response.status(400).json({ error: 'Project not found.' })
+    }
 
-    return response.json([
-        'Projeto 4',
-        'Projeto 2',
-        'Projeto 3',
-    ]);
+    const project = {
+        id,
+        title,
+        owner,
+    };
+
+    projects[projectIndex] = project;
+
+    return response.json(project);
 });
 
 // localhost:3333/projects/1
 // browser não consegue acessar com esse método, precisa de restclient (insomnia)
 app.delete('/projects/:id', (request, response) => {
-    return response.json([
-        'Projeto 2',
-        'Projeto 3',
-    ]);
+    const { id } = request.params;
+
+    const projectIndex = projects.findIndex(project => project.id === id)
+    
+    if (projectIndex < 0){
+        return response.status(400).json({ error: 'Project not found.' })
+    }
+
+    projects.splice(projectIndex, 1);
+
+    return response.status(204).send(); // resposta vazia mas com 204
 });
 
 // escolha pessoal do Diego
