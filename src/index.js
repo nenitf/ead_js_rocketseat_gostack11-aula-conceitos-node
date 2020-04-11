@@ -51,7 +51,7 @@ function validateProjectId(request, response, next) {
 }
 
 app.use(logRequest);
-app.use('/projects', validateProjectId);
+app.use('/projects/:id', validateProjectId);
 
 
 const projects = [];
