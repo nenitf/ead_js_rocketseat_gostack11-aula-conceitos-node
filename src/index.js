@@ -1,5 +1,6 @@
 const express = require('express');
-const { uuid, isUuid } = require('uuidv4'); // universe unique id
+const cors = require('cors');
+const { uuid, isUuid } = require('uuidv4'); // universal unique id
 
 const app = express();
 
@@ -30,6 +31,15 @@ app.use(express.json());
    * 
    * Interceptador de requisições que pode interromper totalmente a requisição ou alterar dados da requisição
    */
+
+// permite que qualquer frontend acesse a api
+// para ambiente dev ok
+app.use(cors())
+
+// em prod:
+// app.use(cors({
+    // origin: 'http://exemplo.com'
+// }))
 
 function logRequest(request, response, next) {
     const { method, url } = request;
